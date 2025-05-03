@@ -1,0 +1,10 @@
+node_modules/
+dist/
+package-lock.json
+*.tgz
+*.log
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+.env.*.local
