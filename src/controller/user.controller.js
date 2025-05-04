@@ -6,8 +6,8 @@ import apiResponse from "../utils/apiResponse.js";
 const signUp = asynchandeler(async (req, res, next) => {
   const { name, email, password } = req?.body;
 
-  const user = await User.findOne({email})
-  if(user) throw new apiError(500, "user allready exist")
+  const user = await User.findOne({ email });
+  if (user) throw new apiError(500, "user allready exist");
 
   const newUser = await User.create({
     name,
@@ -15,7 +15,9 @@ const signUp = asynchandeler(async (req, res, next) => {
     password,
   });
 
-  const createdUser = await User.findById(newUser._id).select('-password -accessToken');
+  const createdUser = await User.findById(newUser._id).select(
+    "-password -accessToken"
+  );
   if (!createdUser) throw new apiError(500, "could not create user");
 
   res.status(200).json(new apiResponse(200, createdUser));
@@ -27,7 +29,7 @@ const generateAccessToke = async (userId) => {
     throw new apiError(500, "can not find user to generate access token");
   }
 
-  const accessToken = await user.generateAccessToke();
+  const accessToken = await user.generateAccessToken();
   user.accessToken = accessToken;
   user.save({
     validateBeforeSave: false,
@@ -50,9 +52,11 @@ const logIn = asynchandeler(async (req, res, next) => {
    */
 
   const { email, password } = req.body;
-  if (!email || password) throw new apiError(500, "enter complete credentials");
-  const userInDb = User.findOne({ email });
-  if (!(await userInDb.isPasswordCorrecr(password)))
+  if (!email || !password)
+    throw new apiError(500, "enter complete credentials");
+  const userInDb = await User.findOne({ email });
+  if(!userInDb) throw new apiError(500, "no user registered")
+  if (!(await userInDb.isPasswordCorrect(password)))
     throw new apiError(403, "incorrect password or email");
 
   const loggedUser = await User.findById(userInDb._id).select(
@@ -76,9 +80,7 @@ const logIn = asynchandeler(async (req, res, next) => {
 });
 
 const logOut = asynchandeler(async (req, res, next) => {
-  const user = await User.findById(req?.user?._id).select(
-    "-accessToken password"
-  );
+  const user = await User.findById(req?.user?._id)
   if (!user) throw new apiError(403, "unauthorized access");
 
   const response = await user.updateOne({
@@ -90,7 +92,7 @@ const logOut = asynchandeler(async (req, res, next) => {
     throw new apiError(500, "something went wrong");
   }
 
-  optinos = {
+  const options = {
     httpOnly: true,
     secure: true,
     maxAge: 10 * 24 * 60 * 60 * 1000,
@@ -102,4 +104,27 @@ const logOut = asynchandeler(async (req, res, next) => {
     .json(200, user, "logged out");
 });
 
-export { signUp, logIn, logOut };
+const updateUser = asynchandeler(async (req, res, next) => {
+  const user = await User.findById(req.user?._id);
+  if (!user) throw new apiError(403, "unauthorized access");
+
+  /**
+   * get email name password
+   * allready logged in no need to check
+   * update info
+   */
+
+  const userToUpdate = await User.findById(user._id)
+  const { name, email, password } = req?.body;
+  userToUpdate.name = name
+  userToUpdate.email = email
+  userToUpdate.password = password
+  await userToUpdate.save()
+
+  const updatedUser = await User.findById(userToUpdate._id).select("-password -accessToken");
+
+  if(!updatedUser) throw new apiError(500, "could not update user");
+  res.status(200).json(new apiResponse(200, updatedUser, "user updated"))
+});
+
+export { signUp, logIn, logOut, updateUser };

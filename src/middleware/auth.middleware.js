@@ -1,16 +1,16 @@
-import jwt from 'json-web-token'
+import jwt from 'jsonwebtoken'
 
 
-import { User } from "../models/user.model";
-import { asynchandeler } from "../utils/asyncHandeler";
-import apiError from '../utils/apiError';
+import { User } from "../models/user.model.js";
+import { asynchandeler } from "../utils/asyncHandeler.js";
+import apiError from '../utils/apiError.js';
 
 export const authMiddleware = asynchandeler( async (req, res, next) => {
-    const accessToken = req.cookies?.accessToken || req.headers("Authorization").replace("Bearer", "")
+    const accessToken = req.cookies?.accessToken || req.header("Authorization").replace("Bearer", "")
 
     if(!accessToken) throw new apiError(403, "unauthorized access");
 
-    const decodedAccessToken = jwt.varify(accessToken, process.env.ACCESTOKENKEY)
+    const decodedAccessToken = await jwt.verify(accessToken, process.env.ACCESTOKENKEY)
     const user = await User.findById(decodedAccessToken._id)
     if(!user) {
         throw new apiError (403, 'unathorized access')

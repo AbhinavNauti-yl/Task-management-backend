@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import userRouter from './routes/user.routes.js'
+import taskRuter from './routes/task.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(express.json(
 ))
 
 app.use("/user", userRouter)
+app.use("/task", taskRuter)
 
 app.get("/", (req, res) => {
     res.send("api working")

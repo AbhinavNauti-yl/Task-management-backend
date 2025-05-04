@@ -8,6 +8,8 @@ const taskSchema = new mongoose.Schema({
   status: { type: String, enum: ["Pending", "In Progress", "Completed"] },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+},{
+  timestamps: true
 });
 
 export const Task = mongoose.model("task", taskSchema)
