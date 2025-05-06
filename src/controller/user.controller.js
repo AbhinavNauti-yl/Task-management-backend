@@ -51,7 +51,7 @@ const logIn = asynchandeler(async (req, res, next) => {
    *
    */
 
-  const { email, password } = req.body;
+  const { email, password } = req?.body;
   if (!email || !password)
     throw new apiError(500, "enter complete credentials");
   const userInDb = await User.findOne({ email });
@@ -60,7 +60,7 @@ const logIn = asynchandeler(async (req, res, next) => {
     throw new apiError(403, "incorrect password or email");
 
   const loggedUser = await User.findById(userInDb._id).select(
-    "-accessToken -password"
+    " -password"
   );
   if (!loggedUser) throw new apiError(500, "could not find user");
 
@@ -97,7 +97,6 @@ const logOut = asynchandeler(async (req, res, next) => {
     secure: true,
     maxAge: 10 * 24 * 60 * 60 * 1000,
   };
-
   res
     .status(200)
     .clearCookie("accessToken", options)
@@ -127,4 +126,10 @@ const updateUser = asynchandeler(async (req, res, next) => {
   res.status(200).json(new apiResponse(200, updatedUser, "user updated"))
 });
 
-export { signUp, logIn, logOut, updateUser };
+const getAllUsers = asynchandeler (async (req, res, next) => {
+  const users = await User.find({}) 
+  if(!users) throw new apiError(400, "no users");
+  res.status(200).json(new apiResponse(200, users, "all users"))
+})
+
+export { signUp, logIn, logOut, updateUser, getAllUsers };

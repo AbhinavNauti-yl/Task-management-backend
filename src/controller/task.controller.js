@@ -14,7 +14,6 @@ const createTaks = asynchandeler(async (req, res, next) => {
     dueDate,
     priority,
     status,
-    createdBy,
     assignedTo,
   } = req.body;
 

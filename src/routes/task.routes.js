@@ -4,7 +4,7 @@ import {authMiddleware} from '../middleware/auth.middleware.js'
 
 const taskRuter = express.Router()
 
-taskRuter.route("/").post(authMiddleware, createTaks)
+taskRuter.route("/createTask").post(authMiddleware, createTaks)
 taskRuter.route("/:_id").delete(authMiddleware, deleteTask)
 taskRuter.route("/:_id").get(authMiddleware, getAllTaskCreatedByMe)
 
