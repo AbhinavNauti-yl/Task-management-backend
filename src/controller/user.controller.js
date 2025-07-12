@@ -108,17 +108,14 @@ const updateUser = asynchandeler(async (req, res, next) => {
   const user = await User.findById(req.user?._id);
   if (!user) throw new apiError(403, "unauthorized access");
 
-  /**
-   * get email name password
-   * allready logged in no need to check
-   * update info
-   */
-
   const userToUpdate = await User.findById(user._id);
   const { name, email, password } = req?.body;
+  if(!(userToUpdate.email == email)) {
+    throw new apiError(500, "Could Not Update User, Try Logging In Again")
+  }
   userToUpdate.name = name;
   userToUpdate.email = email;
-  userToUpdate.password = password;
+  password && (userToUpdate.password = password) ;
   await userToUpdate.save();
 
   const updatedUser = await User.findById(userToUpdate._id).select(
